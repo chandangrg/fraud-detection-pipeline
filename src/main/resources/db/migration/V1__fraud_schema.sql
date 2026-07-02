@@ -1,0 +1,11 @@
+create table accounts(account_id varchar(80) primary key,owner_name varchar(120) not null,risk_tier varchar(20) not null,daily_limit numeric(19,4) not null);
+create table transactions(id varchar(36) primary key,idempotency_key varchar(120) not null unique,request_fingerprint varchar(64) not null,account_id varchar(80) not null,amount numeric(19,4) not null,currency varchar(3) not null,status varchar(32) not null,correlation_id varchar(120) not null,created_at timestamp with time zone not null);
+create index idx_tx_account on transactions(account_id);
+create table outbox_events(id varchar(36) primary key,aggregate_id varchar(80) not null,event_type varchar(100) not null,schema_version integer not null,payload text not null,correlation_id varchar(120) not null,status varchar(24) not null,publish_attempts integer not null default 0,next_attempt_at timestamp with time zone not null,lease_owner varchar(120),lease_until timestamp with time zone,last_error varchar(1000),created_at timestamp with time zone not null,published_at timestamp with time zone,version bigint not null default 0);
+create index idx_fraud_outbox_due on outbox_events(status,next_attempt_at,lease_until);
+create table processed_events(event_id varchar(36) primary key,processed_at timestamp with time zone not null);
+create table fraud_decisions(id varchar(36) primary key,transaction_id varchar(80) not null unique,event_id varchar(36) not null,outcome varchar(20) not null,risk_score integer not null,reasons varchar(1000) not null,correlation_id varchar(120) not null,created_at timestamp with time zone not null);
+create table review_cases(id varchar(36) primary key,transaction_id varchar(80) not null,status varchar(30) not null,reason varchar(1000) not null,created_at timestamp with time zone not null);
+create table dlq_records(id varchar(36) primary key,event_key varchar(120),payload text not null,error_message varchar(1000),dlq_topic varchar(200) not null,dlq_partition integer not null,dlq_offset bigint not null,status varchar(20) not null,received_at timestamp with time zone not null,replayed_at timestamp with time zone);
+create unique index ux_dlq_position on dlq_records(dlq_topic,dlq_partition,dlq_offset);
+create index idx_dlq_status_received on dlq_records(status,received_at);

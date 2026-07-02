@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/contracts/transaction-event-v1.schema.json",
+  "title": "Transaction Event v1",
+  "type": "object",
+  "required": ["eventId", "schemaVersion", "producer", "transactionId", "accountId", "amount", "currency", "status", "occurredAt", "correlationId"],
+  "properties": {
+    "eventId": {"type": "string", "minLength": 1},
+    "schemaVersion": {"const": 1},
+    "producer": {"const": "fraud-detection-pipeline"},
+    "transactionId": {"type": "string", "minLength": 1},
+    "accountId": {"type": "string", "minLength": 1},
+    "amount": {"type": "number", "exclusiveMinimum": 0},
+    "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "status": {"type": "string"},
+    "occurredAt": {"type": "string", "format": "date-time"},
+    "correlationId": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}

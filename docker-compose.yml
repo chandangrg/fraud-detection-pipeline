@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      { POSTGRES_DB: frauddb, POSTGRES_USER: frauduser, POSTGRES_PASSWORD: local-fraud-password }
+    healthcheck:
+      {
+        test: ["CMD-SHELL", "pg_isready -U frauduser -d frauddb"],
+        interval: 5s,
+        timeout: 3s,
+        retries: 20,
+      }
+    ports: ["5433:5432"]
+  redis:
+    image: redis:7-alpine
+    healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 5s, timeout: 3s, retries: 20 }
+    ports: ["6379:6379"]
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    environment: { ZOOKEEPER_CLIENT_PORT: 2181 }
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on: [zookeeper]
+    ports: ["9092:9092"]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      {
+        test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:29092 --list"],
+        interval: 10s,
+        timeout: 5s,
+        retries: 20,
+      }
+  api:
+    build: .
+    profiles: [app]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      SERVER_PORT: 8081
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: postgres
+      DB_PASSWORD: local-fraud-password
+      REDIS_HOST: redis
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      ADMIN_API_KEY: local-admin-key
+      DEMO_DATA_ENABLED: "true"
+    ports: ["8081:8081"]
