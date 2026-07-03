@@ -24,3 +24,4 @@
 ./mvnw verify
 docker compose --profile app up --build
 curl http://localhost:8081/actuator/health
+```

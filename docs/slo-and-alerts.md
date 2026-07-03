@@ -1,6 +1,6 @@
 # Example SLOs and alert rules
 
-These are **portfolio design targets**, not measured production claims.
+These are example design targets for a production-like deployment. They have not been validated in a production environment.
 
 | Signal | Example target | Example alert |
 |---|---:|---|
@@ -19,4 +19,5 @@ These are **portfolio design targets**, not measured production claims.
 
 ## Required dashboard panels
 
-API latency/error rate, outbox age/count, Kafka consumer lag, processing failures, open DLQ records, open review cases, Redis errors, database-pool saturation, and JVM memory/GC.
+API latency/error rate, outbox age/count, Kafka consumer lag, processing failures, open DLQ records, open review cases, Redis errors,
+database-pool saturation, and JVM memory/GC.

@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-This portfolio project supports the latest tagged release only.
+The latest tagged release is the currently supported version.
 
 ## Reporting a vulnerability
 
