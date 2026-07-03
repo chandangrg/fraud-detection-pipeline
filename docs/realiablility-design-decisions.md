@@ -1,6 +1,5 @@
-# Audit findings resolved
-
-| Audit finding | Resolution | Primary code/tests |
+# Reliability design decisions
+| Reliability concern | Design decision | Primary code and tests |
 |---|---|---|
 | Kafka publish occurred inside the transaction | Transaction and event are committed to a transactional outbox; publishing is asynchronous | `TransactionInsertService`, `OutboxPublisher` |
 | API read-then-write idempotency race | Unique key, request fingerprint and winner lookup after a concurrent constraint race | `TransactionService`, `TransactionIdempotencyPostgresIT` |

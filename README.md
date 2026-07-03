@@ -413,12 +413,10 @@ TransactionController
 → FraudDecisionService
 → DlqPersistenceConsumer
 → DlqReplayService
-```
-
+`
 Additional guides:
 
-- [`STUDY_GUIDE.md`](STUDY_GUIDE.md)
-- [`UPGRADE_NOTES.md`](UPGRADE_NOTES.md)
+- [`docs/reliability-design-decisions.md`](docs/reliability-design-decisions.md)
 - [`CHANGELOG.md`](CHANGELOG.md)
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
