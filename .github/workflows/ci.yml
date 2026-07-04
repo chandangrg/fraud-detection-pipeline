@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   backend:
@@ -24,7 +25,8 @@ jobs:
           distribution: temurin
           java-version: "17"
           cache: maven
-
+      - name: Ensure Maven wrapper is executable
+        run: chmod +x ./mvnw
       - name: Verify backend
         run: ./mvnw -B -ntp verify
 
@@ -99,7 +101,8 @@ jobs:
           docker compose ps
           docker compose logs --no-color
           exit 1
-
+      - name: Ensure Maven wrapper is executable
+        run: chmod +x ./mvnw
       - name: Run RestAssured E2E tests
         run: >
           ./mvnw -B -ntp
