@@ -1,5 +1,9 @@
 # Fraud Detection Pipeline
 
+# Fraud Detection Pipeline
+
+[![CI](https://github.com/chandangrg/fraud-detection-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/chandangrg/fraud-detection-pipeline/actions/workflows/ci.yml)
+
 A Java 17 backend that demonstrates failure-safe transaction intake,
 asynchronous fraud evaluation, and operational recovery using Spring Boot,
 PostgreSQL, Kafka, and Redis.
