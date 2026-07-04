@@ -155,6 +155,10 @@ public class OutboxEvent {
     return nextAttemptAt;
   }
 
+  public String getLeaseOwner() {
+    return leaseOwner;
+  }
+
   public Instant getLeaseUntil() {
     return leaseUntil;
   }

@@ -15,24 +15,27 @@ public class OutboxStateService {
   }
 
   @Transactional
-  public void published(String id) {
-    r.findById(id).orElseThrow().published();
+  public boolean published(String id, String worker) {
+    return r.markPublishedIfOwned(id, worker, Instant.now()) == 1;
   }
 
   @Transactional
-  public void retry(String id, String error, int n) {
-    r.findById(id)
-        .orElseThrow()
-        .retry(error, Instant.now().plusSeconds(Math.min(300, 1L << Math.min(n, 8))));
+  public boolean retry(String id, String worker, String error, int n) {
+    Instant nextAttemptAt = Instant.now().plusSeconds(Math.min(300, 1L << Math.min(n, 8)));
+    return r.markRetryIfOwned(id, worker, clip(error), nextAttemptAt) == 1;
   }
 
   @Transactional
-  public void dead(String id, String error) {
-    r.findById(id).orElseThrow().dead(error);
+  public boolean dead(String id, String worker, String error) {
+    return r.markDeadIfOwned(id, worker, clip(error)) == 1;
   }
 
   @Transactional
   public void replay(String id) {
     r.findById(id).orElseThrow().replay();
+  }
+
+  private String clip(String s) {
+    return s == null ? null : s.substring(0, Math.min(s.length(), 1000));
   }
 }

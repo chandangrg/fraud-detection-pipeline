@@ -60,11 +60,11 @@ public class OutboxPublisher {
     try {
       TransactionEvent event = mapper.readValue(e.getPayload(), TransactionEvent.class);
       kafka.send(topic, event.accountId(), event).get(timeout, TimeUnit.MILLISECONDS);
-      states.published(id);
+      states.published(id, worker);
     } catch (com.fasterxml.jackson.core.JsonProcessingException poison) {
-      states.dead(id, poison.getMessage());
+      states.dead(id, worker, poison.getMessage());
     } catch (Exception transientFailure) {
-      states.retry(id, transientFailure.getMessage(), e.getPublishAttempts() + 1);
+      states.retry(id, worker, transientFailure.getMessage(), e.getPublishAttempts() + 1);
     }
   }
 }

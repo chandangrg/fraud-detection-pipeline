@@ -18,4 +18,38 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEvent, String
   List<OutboxEvent> findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus status);
 
   long countByStatus(OutboxStatus status);
+
+  @Modifying
+  @Query(
+      value =
+          "update outbox_events set status='PUBLISHED', published_at=:now, lease_owner=null,"
+              + " lease_until=null, last_error=null, version=version+1 where id=:id and"
+              + " lease_owner=:worker and status='IN_FLIGHT'",
+      nativeQuery = true)
+  int markPublishedIfOwned(
+      @Param("id") String id, @Param("worker") String worker, @Param("now") Instant now);
+
+  @Modifying
+  @Query(
+      value =
+          "update outbox_events set status='RETRY', publish_attempts=publish_attempts+1,"
+              + " next_attempt_at=:nextAttemptAt, last_error=:error, lease_owner=null,"
+              + " lease_until=null, version=version+1 where id=:id and lease_owner=:worker"
+              + " and status='IN_FLIGHT'",
+      nativeQuery = true)
+  int markRetryIfOwned(
+      @Param("id") String id,
+      @Param("worker") String worker,
+      @Param("error") String error,
+      @Param("nextAttemptAt") Instant nextAttemptAt);
+
+  @Modifying
+  @Query(
+      value =
+          "update outbox_events set status='DEAD_LETTER', publish_attempts=publish_attempts+1,"
+              + " last_error=:error, lease_owner=null, lease_until=null, version=version+1"
+              + " where id=:id and lease_owner=:worker and status='IN_FLIGHT'",
+      nativeQuery = true)
+  int markDeadIfOwned(
+      @Param("id") String id, @Param("worker") String worker, @Param("error") String error);
 }
