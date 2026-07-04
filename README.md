@@ -1,36 +1,21 @@
 # Fraud Detection Pipeline
 
-A production-style Java backend demonstrating reliable transaction intake, asynchronous fraud evaluation, transactional messaging, durable idempotency, and operational recovery patterns.
+A Java 17 backend that demonstrates failure-safe transaction intake,
+asynchronous fraud evaluation, and operational recovery using Spring Boot,
+PostgreSQL, Kafka, and Redis.
 
-> This is a synthetic portfolio project. It contains no employer code, production data, customer information, credentials, or confidential architecture.
+The project focuses on five backend reliability scenarios:
 
-## Why this project exists
-
-A basic Kafka demo usually publishes a message and prints it to a log. That does not address the failures that matter in a real financial system:
-
-- What happens when the database commits but Kafka publishing fails?
-- What happens when a client retries the same payment request?
-- What happens when Kafka redelivers an event?
-- What happens when multiple workers publish concurrently?
-- What happens when a malformed message reaches the consumer?
-- How can an operator inspect and safely replay failed records?
-
-This project focuses on those reliability and correctness problems.
-
-## Key engineering highlights
-
-| Area | Implementation |
+| Failure scenario | Reliability control |
 |---|---|
-| Transaction consistency | Transaction and outbox event are committed in one PostgreSQL transaction |
-| API idempotency | Same key and same payload return the original transaction |
-| Conflict protection | Same idempotency key with a different payload returns HTTP `409 Conflict` |
-| Reliable publishing | Leased outbox workers use retry, backoff, bounded Kafka waits, and `FOR UPDATE SKIP LOCKED` |
-| Consumer idempotency | Processed-event markers prevent duplicate fraud decisions |
-| Failure recovery | Kafka DLQ records are persisted, inspected, and replayed through protected admin endpoints |
-| Cache resilience | Redis accelerates account lookup while PostgreSQL remains the source of truth |
-| Observability | Correlation IDs, Actuator health probes, metrics, Prometheus endpoint, and structured logging |
-| Quality gates | Unit tests, PostgreSQL integration tests, RestAssured E2E tests, JaCoCo, Spotless, and SpotBugs |
-| Delivery | Multi-stage Docker image, Docker Compose environment, GitHub Actions, and Kubernetes references |
+| Database commit succeeds but Kafka is unavailable | Transactional outbox |
+| Client retries the same transaction | Idempotency key with canonical request fingerprint |
+| Kafka redelivers a message | Durable processed-event claim |
+| Consumer receives malformed or poison payload | Persisted DLQ inspection and controlled replay |
+| Redis is unavailable | PostgreSQL fallback with Redis treated as cache only |
+
+This is a synthetic portfolio project. It contains no employer code,
+production data, customer data, credentials, or confidential architecture.
 
 ## Architecture
 
@@ -88,7 +73,6 @@ flowchart LR
 | Quality | JaCoCo, Spotless, Google Java Format, SpotBugs |
 | Observability | Spring Boot Actuator, Micrometer, Prometheus |
 | Runtime | Docker, Docker Compose |
-| Deployment references | Kubernetes |
 | CI | GitHub Actions |
 
 ## Quick start
@@ -377,7 +361,6 @@ Reference service-level objectives and alerting recommendations are documented i
 ```text
 .
 ├── contracts/                  Event schema contracts
-├── deploy/k8s/                 Kubernetes reference manifests
 ├── docs/
 │   ├── adr/                    Architecture decision records
 │   ├── runbook.md              Operational troubleshooting
@@ -432,7 +415,7 @@ This project demonstrates production patterns but is not presented as a producti
 - Event compatibility is documented through a JSON schema but not enforced by a centralized schema registry.
 - Leasing reduces duplicate publishing but does not mathematically eliminate it; downstream consumer idempotency remains the correctness guarantee.
 - DLQ replay should be performed only after the underlying failure has been corrected.
-- Kubernetes files are deployment references and are not a complete cloud platform configuration.
+
 
 ## Security and data statement
 

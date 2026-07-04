@@ -10,7 +10,7 @@ These are example design targets for a production-like deployment. They have not
 | Fraud decision age | 99% < 30 s after Kafka publication | consumer lag or oldest undecided event > 60 s |
 | DLQ volume | zero under normal synthetic traffic | any new OPEN record; page on sustained growth |
 
-## Exposed portfolio metrics
+## Exposed metrics
 
 - `fraud_outbox_backlog`
 - `fraud_dlq_open`
