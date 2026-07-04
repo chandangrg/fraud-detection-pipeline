@@ -3,8 +3,10 @@ package com.chandan.frauddetection.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.chandan.frauddetection.entity.OutboxEvent;
+import com.chandan.frauddetection.entity.OutboxStatus;
 import com.chandan.frauddetection.repository.OutboxEventRepository;
 import com.chandan.frauddetection.service.OutboxClaimService;
+import com.chandan.frauddetection.service.OutboxStateService;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,6 +48,31 @@ class OutboxLeasePostgresIT {
   @Autowired OutboxEventRepository repository;
 
   @Autowired OutboxClaimService claims;
+
+  @Autowired OutboxStateService states;
+
+  @Test
+  void staleWorkerCannotCompleteEventAfterLeaseIsReclaimed() {
+    OutboxEvent event =
+        new OutboxEvent(
+            "event-stale", "transaction-stale", "TransactionAccepted", 1, "{}", "corr-stale");
+    repository.saveAndFlush(event);
+
+    assertThat(claims.claim("worker-a", 1, Duration.ofMillis(-1))).containsExactly("event-stale");
+    assertThat(claims.claim("worker-b", 1, Duration.ofSeconds(30))).containsExactly("event-stale");
+
+    assertThat(states.published("event-stale", "worker-a")).isFalse();
+
+    OutboxEvent afterStaleUpdate = repository.findById("event-stale").orElseThrow();
+    assertThat(afterStaleUpdate.getStatus()).isEqualTo(OutboxStatus.IN_FLIGHT);
+    assertThat(afterStaleUpdate.getLeaseOwner()).isEqualTo("worker-b");
+
+    assertThat(states.published("event-stale", "worker-b")).isTrue();
+
+    OutboxEvent afterValidUpdate = repository.findById("event-stale").orElseThrow();
+    assertThat(afterValidUpdate.getStatus()).isEqualTo(OutboxStatus.PUBLISHED);
+    assertThat(afterValidUpdate.getLeaseOwner()).isNull();
+  }
 
   @Test
   void concurrentWorkersReceiveDisjointLeases() throws Exception {

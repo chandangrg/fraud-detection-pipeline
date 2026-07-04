@@ -1,6 +1,5 @@
-# Audit findings resolved
-
-| Audit finding | Resolution | Primary code/tests |
+# Reliability design decisions
+| Reliability concern | Design decision | Primary code and tests |
 |---|---|---|
 | Kafka publish occurred inside the transaction | Transaction and event are committed to a transactional outbox; publishing is asynchronous | `TransactionInsertService`, `OutboxPublisher` |
 | API read-then-write idempotency race | Unique key, request fingerprint and winner lookup after a concurrent constraint race | `TransactionService`, `TransactionIdempotencyPostgresIT` |
@@ -10,4 +9,4 @@
 | No operational DLQ path | Consumer retries, DLT publication, raw-text persistence, deterministic redelivery identity, inspection, metrics and API-key-protected OPEN-only replay | `KafkaConsumerConfig`, `DlqKafkaListenerConfig`, `DlqPersistenceConsumer`, `DlqReplayService`, `DlqRecordTest` |
 | Cache treated as correctness state | Redis is only an optimization; database fallback and a short load lock protect the read path | `AccountCacheService` |
 | No event contract version | Every event carries event ID, schema version, producer, timestamp and correlation ID | `TransactionEvent` |
-| Missing deployment/quality evidence | CI, Testcontainers, JaCoCo, SpotBugs, OpenAPI, custom metrics, Docker, Kubernetes manifests, SLO examples, ADRs and runbook | repository root, `docs/` and `deploy/k8s/` |
+| Missing quality and runtime evidence | CI, Testcontainers, JaCoCo, SpotBugs, OpenAPI, custom metrics, non-root Docker image, SLO examples, ADRs and runbook | repository root and `docs/` |
