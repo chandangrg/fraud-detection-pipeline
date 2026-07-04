@@ -306,11 +306,11 @@ and GitHub Actions.
 
 | Evidence | Screenshot |
 |---|---|
-| Maven quality gate passed | ![Maven verify success](docs/images/01-maven-verify-success.png) |
-| Git history includes a real reliability fix | ![Git history engineering fix](docs/images/02-git-history-engineering-fix.png) |
-| Docker Compose stack running | ![Docker Compose running](docs/images/03-docker-compose-running.png) |
-| Actuator health endpoint reports UP | ![Actuator health UP](docs/images/04-actuator-health-up.png) |
-| GitHub Actions passed | ![GitHub Actions passed](docs/images/05-github-actions-passed.png) |
+| Maven quality gate passed | ![Maven verify success](docs/images/maven-verify-success.png) |
+| Git history includes a real reliability fix | ![Git history engineering fix](docs/images/git-history-engineering-fix.png) |
+| Docker Compose stack running | ![Docker Compose running](docs/images/docker-compose-running.png) |
+| Actuator health endpoint reports UP | ![Actuator health UP](docs/images/actuator-health-up.png) |
+| GitHub Actions passed | ![GitHub Actions passed](docs/images/github-actions-passed.png) |
 
 The E2E suite verifies:
 
